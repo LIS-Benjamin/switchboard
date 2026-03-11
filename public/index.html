@@ -3,30 +3,90 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Claude Session Browser</title>
-  <link rel="stylesheet" href="/xterm/css/xterm.css">
-  <link rel="stylesheet" href="/style.css">
+  <title>Switchboard</title>
+  <link rel="stylesheet" href="../node_modules/@xterm/xterm/css/xterm.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div id="app-container">
   <div id="sidebar">
     <div id="sidebar-header">
-      <h1>Sessions</h1>
-      <button id="star-toggle" title="Show starred only">&#9733;</button>
-      <button id="archive-toggle" title="Show archived sessions">Archived</button>
+      <div id="sidebar-tabs">
+        <button class="sidebar-tab active" data-tab="sessions">Sessions</button>
+        <button class="sidebar-tab" data-tab="plans">Plans</button>
+        <button class="sidebar-tab" data-tab="stats">Stats</button>
+        <button class="sidebar-tab" data-tab="memory">Memory</button>
+      </div>
+      <div id="session-filters">
+        <button id="running-toggle" title="Show running only"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="4"/></svg></button>
+        <button id="star-toggle" title="Show pinned only"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M9.828.722a.5.5 0 0 1 .354.146l4.95 4.95a.5.5 0 0 1-.707.707c-.28-.28-.576-.49-.888-.656L10.073 9.333l-.07 3.181a.5.5 0 0 1-.853.354l-3.535-3.536-4.243 4.243a.5.5 0 1 1-.707-.707l4.243-4.243L1.372 5.11a.5.5 0 0 1 .354-.854l3.18-.07L8.37.722A3.37 3.37 0 0 1 9.12.074a.5.5 0 0 1 .708.002l-.707.707z"/></svg></button>
+        <button id="archive-toggle" title="Show archived sessions"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1.5,1.5 L14.5,1.5 L14.5,5 L1.5,5 Z"/><path d="M1.5,5 L1.5,14.5 L14.5,14.5 L14.5,5"/><line x1="6" y1="8" x2="10" y2="8"/></svg></button>
+        <span id="loading-status" style="display:none;"></span>
+        <button id="global-settings-btn" title="Global settings"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6.6 1h2.8l.4 2.1a5.5 5.5 0 0 1 1.3.8l2-.8 1.4 2.4-1.6 1.4a5.6 5.6 0 0 1 0 1.5l1.6 1.4-1.4 2.4-2-.8a5.5 5.5 0 0 1-1.3.8L9.4 15H6.6l-.4-2.1a5.5 5.5 0 0 1-1.3-.8l-2 .8-1.4-2.4 1.6-1.4a5.6 5.6 0 0 1 0-1.5L1.5 6.2l1.4-2.4 2 .8a5.5 5.5 0 0 1 1.3-.8L6.6 1z"/><circle cx="8" cy="8" r="2.5"/></svg></button>
+      </div>
     </div>
     <div id="search-bar">
       <input id="search-input" type="text" placeholder="Search by name or ID..." />
+      <button id="search-clear" type="button" aria-label="Clear search">&times;</button>
     </div>
     <div id="sidebar-content"></div>
+    <div id="plans-content" style="display:none;"></div>
+    <div id="stats-content" style="display:none;">
+      <div class="plans-empty">Click the Stats tab to view activity heatmap.</div>
+    </div>
+    <div id="memory-content" style="display:none;"></div>
   </div>
+  <div id="sidebar-resize-handle"></div>
   <div id="main">
     <div id="placeholder">
       <p>Select a session from the sidebar to begin.</p>
     </div>
+    <div id="stats-viewer" style="display:none;">
+      <div id="stats-viewer-header">
+        <span id="stats-viewer-title">Activity</span>
+      </div>
+      <div id="stats-viewer-body"></div>
+    </div>
+    <div id="memory-viewer" style="display:none;">
+      <div id="memory-viewer-header">
+        <span id="memory-viewer-title"></span>
+        <span id="memory-viewer-filename"></span>
+      </div>
+      <div id="memory-viewer-body"></div>
+    </div>
+    <div id="plan-viewer" style="display:none;">
+      <div id="plan-viewer-header">
+        <div id="plan-viewer-header-info">
+          <span id="plan-viewer-title"></span>
+          <span id="plan-viewer-filepath"></span>
+          <button id="plan-copy-path-btn" title="Copy file path"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M5.5 10.5h-1a1.5 1.5 0 0 1-1.5-1.5v-5a1.5 1.5 0 0 1 1.5-1.5h5a1.5 1.5 0 0 1 1.5 1.5v1"/></svg></button>
+        </div>
+        <div id="plan-viewer-header-controls">
+          <button id="plan-copy-content-btn" title="Copy raw content">Copy</button>
+          <button id="plan-save-btn" title="Save changes">Save</button>
+        </div>
+      </div>
+      <div id="plan-viewer-editor"></div>
+    </div>
+    <div id="settings-viewer" style="display:none;">
+      <div id="settings-viewer-header">
+        <span id="settings-viewer-title">Settings</span>
+      </div>
+      <div id="settings-viewer-body"></div>
+    </div>
+    <div id="jsonl-viewer" style="display:none;">
+      <div id="jsonl-viewer-header">
+        <span id="jsonl-viewer-title">Message History</span>
+        <span id="jsonl-viewer-session-id"></span>
+      </div>
+      <div id="jsonl-viewer-body"></div>
+    </div>
     <div id="terminal-area">
+      <div id="terminal-progress-bar"></div>
       <div id="terminal-header" style="display:none;">
         <div id="terminal-header-info">
           <span id="terminal-header-name"></span>
+          <span id="terminal-header-pty-title" style="display:none;"></span>
           <span id="terminal-header-id"></span>
         </div>
         <div id="terminal-header-controls">
@@ -38,8 +98,18 @@
       <div id="terminals"></div>
     </div>
   </div>
-  <script src="/xterm/lib/xterm.js"></script>
-  <script src="/xterm-addon-fit/lib/addon-fit.js"></script>
-  <script src="/app.js"></script>
+  </div><!-- /app-container -->
+  <div id="update-toast" class="hidden">
+    <span id="update-toast-msg">Update ready — restart to apply</span>
+    <button id="update-restart-btn">Restart</button>
+    <button id="update-dismiss-btn">Later</button>
+  </div>
+  <div id="status-bar"><span id="status-bar-info"></span><span id="status-bar-activity"></span></div>
+  <script src="../node_modules/@xterm/xterm/lib/xterm.js"></script>
+  <script src="../node_modules/@xterm/addon-fit/lib/addon-fit.js"></script>
+  <script src="../node_modules/@xterm/addon-web-links/lib/addon-web-links.js"></script>
+  <script src="../node_modules/morphdom/dist/morphdom-umd.js"></script>
+  <script src="codemirror-bundle.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

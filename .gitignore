@@ -1,1 +1,14 @@
 node_modules/
+dist/
+*.db
+*.db-wal
+*.db-shm
+public/codemirror-bundle.js
+.DS_Store
+*.pem
+.env
+.cache/
+build/icon.icns
+build/icon.ico
+build/dmg-background.png
+build/dmg-background@2x.png
