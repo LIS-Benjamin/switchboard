@@ -1,6 +1,18 @@
 # Switchboard
 
-A desktop app for browsing, searching, and managing CLI coding sessions. Connect to running sessions with a built-in terminal, track unread activity, archive old sessions, and view usage stats.
+Your command center for Claude Code sessions.
+
+Switchboard is a desktop app that gives you a unified view of all your Claude Code sessions across every project. Launch, resume, fork, and monitor sessions from a single window — no more juggling terminal tabs or digging through `~/.claude/projects` to find that one conversation from last week.
+
+### Key Features
+
+- **Session Browser** — All your Claude Code sessions, organized by project, searchable by content
+- **Built-in Terminal** — Connect to running sessions or launch new ones without leaving the app
+- **Status Notifications** — In-app alerts when a session is waiting for permission approval or user input
+- **Fork & Resume** — Branch off from any point in a session's history
+- **Full-Text Search** — Find any session by what was discussed, not just when it happened
+- **Plans & Memory** — Browse and edit your plan files and CLAUDE.md memory in one place
+- **Activity Stats** — Heatmap of your coding activity across all projects
 
 ## Prerequisites
 
@@ -16,9 +28,6 @@ A desktop app for browsing, searching, and managing CLI coding sessions. Connect
 ```bash
 # Install dependencies (runs postinstall automatically)
 npm install
-
-# Generate app icons (optional for dev)
-npm run generate-icons
 
 # Start the app
 npm start
@@ -65,11 +74,11 @@ Set `GH_TOKEN` in your environment (a GitHub personal access token with `repo` s
 
 ## Auto-Updates
 
-The app uses `electron-updater` to check for updates from GitHub Releases on launch. Updates are only checked in packaged builds (not during development). The flow:
+The app uses `electron-updater` to check for updates from GitHub Releases on launch and every 4 hours. Updates are only checked in packaged builds (not during development). The flow:
 
-1. App checks for updates 5 seconds after launch
-2. If available, renderer receives an `update-available` event
-3. User can trigger download and install via the exposed API
+1. App auto-downloads updates in the background
+2. A toast notification appears when the update is ready
+3. User can restart immediately or dismiss (installs on next quit)
 
 ## Code Signing
 
